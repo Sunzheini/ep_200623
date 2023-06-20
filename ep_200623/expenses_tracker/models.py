@@ -1,5 +1,5 @@
 from django.core.exceptions import ValidationError
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinLengthValidator, MinValueValidator
 from django.db import models
 
 
@@ -46,19 +46,30 @@ class Profile(models.Model):
     )
 
     budget = models.FloatField(
-        default=0.0,
+        default=0,
         validators=(
-            below_zero_validator,
+            MinValueValidator(0),
         ),
     )
 
     profile_image = models.ImageField(
+
+        # !!!
+        upload_to='profiles/',
+
         blank=True, null=True,
-        default='user.png',
+
+        # default is put inside the template
+        # default='/static/images/user.png',
+
         validators=(
             max_size_validator,
         ),
     )
+
+    @property
+    def get_full_name(self):
+        return f'{self.first_name} {self.last_name}'
 
     def save(self, *args, **kwargs):
         self.full_clean()
